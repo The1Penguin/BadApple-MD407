@@ -44,7 +44,7 @@ void graphic_pixel_clear(int x, int y){
     __asm volatile (" BX LR\n");
 }
 
-void delay_150ns(void)
+void delay_250ns(void)
 {
     *STK_CTRL = 0;
     *STK_LOAD = 168/4-1;
@@ -60,10 +60,10 @@ void delay_micro(unsigned int us){
     #endif
     
     while (us > 0){
-        delay_150ns();
-        delay_150ns();
-        delay_150ns();
-        delay_150ns();
+        delay_250ns();
+        delay_250ns();
+        delay_250ns();
+        delay_250ns();
         us--;
     }
 }
@@ -82820,6 +82820,12 @@ void main(void)
                     graphic_pixel_set(x*2+1, y*2);
                     graphic_pixel_set(x*2, y*2+1);
                     graphic_pixel_set(x*2+1, y*2+1);
+                }
+                else {
+                    graphic_pixel_clear(x*2, y*2);
+                    graphic_pixel_clear(x*2+1, y*2);
+                    graphic_pixel_clear(x*2, y*2+1);
+                    graphic_pixel_clear(x*2+1, y*2+1);
                 }
             }
         }
