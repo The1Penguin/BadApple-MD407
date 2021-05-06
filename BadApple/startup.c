@@ -33,15 +33,15 @@ void graphic_clear_screen(void){
 }
 
 __attribute__((naked))
-void graphic_pixel_set(int x, int y){
-    __asm volatile (" .HWORD  0xDFF2\n");
-    __asm volatile (" BX LR\n");
-}
-
-__attribute__((naked))
-void graphic_pixel_clear(int x, int y){
-    __asm volatile (" .HWORD  0xDFF3\n");
-    __asm volatile (" BX LR\n");
+void graphic_line_set(int x, int y, int i)
+{
+    __asm__ volatile (" Z0: .HWORD 0xDFF2\n"); // Rita ut pixel på position x, y
+    __asm__ volatile (" Z1: ADD R0,#1\n");    // x += 1
+    __asm__ volatile (" LSL R2,R2,#1\n");      // i = i << 1
+    __asm__ volatile (" BCS Z0\n"); // Hoppa till Z0 om c = 1
+    __asm__ volatile (" CMN R2,R2\n");
+    __asm__ volatile (" BNE Z1\n"); // Hoppa till Z1 om R2 != 0
+    __asm__ volatile (" BX LR\n");
 }
 
 void delay_250ns(void)
@@ -82814,22 +82814,9 @@ void main(void)
     graphic_clear_screen();
     for (int frame=0; frame < sizeof(video)/sizeof(video[0]); frame++){
         for (int y=0; y < sizeof(video[0])/sizeof(video[0][0]); y++){
-            for (int x=0; x < 32; x++){
-                if (video[frame][y][0] & (1 << x)){
-                    graphic_pixel_set(x*2, y*2);
-                    graphic_pixel_set(x*2+1, y*2);
-                    graphic_pixel_set(x*2, y*2+1);
-                    graphic_pixel_set(x*2+1, y*2+1);
-                }
-                else {
-                    graphic_pixel_clear(x*2, y*2);
-                    graphic_pixel_clear(x*2+1, y*2);
-                    graphic_pixel_clear(x*2, y*2+1);
-                    graphic_pixel_clear(x*2+1, y*2+1);
-                }
-            }
+            graphic_line_set(0, y+1, video[frame][y][0]);
         }
-        delay_milli(20);
+        delay_milli(30);
         graphic_clear_screen();
     }
 }
